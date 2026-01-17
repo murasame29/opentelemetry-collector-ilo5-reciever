@@ -2,7 +2,6 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/murasame29/opentelemetry-collector-ilo5-reciever.svg)](https://pkg.go.dev/github.com/murasame29/opentelemetry-collector-ilo5-reciever)
 [![CI](https://github.com/murasame29/opentelemetry-collector-ilo5-reciever/actions/workflows/ci.yaml/badge.svg)](https://github.com/murasame29/opentelemetry-collector-ilo5-reciever/actions/workflows/ci.yaml)
-[![codecov](https://codecov.io/gh/murasame29/opentelemetry-collector-ilo5-reciever/branch/main/graph/badge.svg)](https://codecov.io/gh/murasame29/opentelemetry-collector-ilo5-reciever)
 
 HPE iLO5 からメトリクスを収集する OpenTelemetry Collector Receiver です。
 
@@ -53,7 +52,7 @@ receivers:
 
 ### Requirements
 
-- Go 1.23+
+- Go 1.25+
 
 ### Build
 
