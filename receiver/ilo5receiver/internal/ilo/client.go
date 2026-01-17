@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -50,13 +51,18 @@ func (c *Client) doRequest(ctx context.Context, method, path string) (*http.Resp
 	return resp, nil
 }
 
+// closeBody closes the response body and discards any error.
+func closeBody(body io.ReadCloser) {
+	_ = body.Close()
+}
+
 func (c *Client) GetSystems(ctx context.Context) ([]System, error) {
 	// First get the collection to find IDs
 	resp, err := c.doRequest(ctx, "GET", "/redfish/v1/Systems")
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer closeBody(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code for Systems: %d", resp.StatusCode)
@@ -78,7 +84,7 @@ func (c *Client) GetSystems(ctx context.Context) ([]System, error) {
 			// Log error but continue? For now, return error
 			return nil, fmt.Errorf("failed to get system %s: %w", member.ID, err)
 		}
-		defer sysResp.Body.Close()
+		defer closeBody(sysResp.Body)
 
 		var sys System
 		if err := json.NewDecoder(sysResp.Body).Decode(&sys); err != nil {
@@ -95,7 +101,7 @@ func (c *Client) GetChassisIds(ctx context.Context) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer closeBody(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code for Chassis: %d", resp.StatusCode)
@@ -120,7 +126,7 @@ func (c *Client) GetPower(ctx context.Context, chassisURI string) (*Power, error
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer closeBody(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code for Power: %d", resp.StatusCode)
@@ -138,7 +144,7 @@ func (c *Client) GetThermal(ctx context.Context, chassisURI string) (*Thermal, e
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer closeBody(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code for Thermal: %d", resp.StatusCode)
@@ -159,7 +165,7 @@ func (c *Client) GetDrives(ctx context.Context, systemIDLink string) (map[string
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer closeBody(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code for Storage: %d", resp.StatusCode)
@@ -180,12 +186,13 @@ func (c *Client) GetDrives(ctx context.Context, systemIDLink string) (map[string
 		if err != nil {
 			continue // Skip failed storage
 		}
-		defer sResp.Body.Close()
 
 		var storage Storage
 		if err := json.NewDecoder(sResp.Body).Decode(&storage); err != nil {
+			closeBody(sResp.Body)
 			continue
 		}
+		closeBody(sResp.Body)
 
 		var drives []Drive
 		// 3. Iterate over Drives in Storage
@@ -194,12 +201,13 @@ func (c *Client) GetDrives(ctx context.Context, systemIDLink string) (map[string
 			if err != nil {
 				continue
 			}
-			defer dResp.Body.Close()
 
 			var drive Drive
 			if err := json.NewDecoder(dResp.Body).Decode(&drive); err != nil {
+				closeBody(dResp.Body)
 				continue
 			}
+			closeBody(dResp.Body)
 			drives = append(drives, drive)
 		}
 		drivesMap[storage.ID] = drives

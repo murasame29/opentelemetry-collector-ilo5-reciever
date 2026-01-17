@@ -72,12 +72,6 @@ make test
 make test-coverage
 ```
 
-### Lint
-
-```bash
-make lint
-```
-
 ### Generate Metadata
 
 ```bash
