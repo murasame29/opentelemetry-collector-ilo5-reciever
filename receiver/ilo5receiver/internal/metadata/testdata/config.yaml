@@ -7,11 +7,11 @@ all_set:
       enabled: true
     ilo.power.consumption:
       enabled: true
-    ilo.power.psu.output:
+    ilo.power.psu.health:
       enabled: true
     ilo.power.psu.input_voltage:
       enabled: true
-    ilo.power.psu.health:
+    ilo.power.psu.output:
       enabled: true
     ilo.power.voltage:
       enabled: true
@@ -42,11 +42,11 @@ none_set:
       enabled: false
     ilo.power.consumption:
       enabled: false
-    ilo.power.psu.output:
+    ilo.power.psu.health:
       enabled: false
     ilo.power.psu.input_voltage:
       enabled: false
-    ilo.power.psu.health:
+    ilo.power.psu.output:
       enabled: false
     ilo.power.voltage:
       enabled: false

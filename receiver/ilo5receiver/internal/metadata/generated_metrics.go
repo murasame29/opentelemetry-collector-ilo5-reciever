@@ -113,6 +113,7 @@ func (m *metricIloFanSpeed) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloFanSpeed(cfg MetricConfig) metricIloFanSpeed {
 	m := metricIloFanSpeed{config: cfg}
+
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -164,6 +165,7 @@ func (m *metricIloPowerCapacity) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloPowerCapacity(cfg MetricConfig) metricIloPowerCapacity {
 	m := metricIloPowerCapacity{config: cfg}
+
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -215,6 +217,7 @@ func (m *metricIloPowerConsumption) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloPowerConsumption(cfg MetricConfig) metricIloPowerConsumption {
 	m := metricIloPowerConsumption{config: cfg}
+
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -267,6 +270,7 @@ func (m *metricIloPowerPsuHealth) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloPowerPsuHealth(cfg MetricConfig) metricIloPowerPsuHealth {
 	m := metricIloPowerPsuHealth{config: cfg}
+
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -319,6 +323,7 @@ func (m *metricIloPowerPsuInputVoltage) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloPowerPsuInputVoltage(cfg MetricConfig) metricIloPowerPsuInputVoltage {
 	m := metricIloPowerPsuInputVoltage{config: cfg}
+
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -371,6 +376,7 @@ func (m *metricIloPowerPsuOutput) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloPowerPsuOutput(cfg MetricConfig) metricIloPowerPsuOutput {
 	m := metricIloPowerPsuOutput{config: cfg}
+
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -423,6 +429,7 @@ func (m *metricIloPowerVoltage) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloPowerVoltage(cfg MetricConfig) metricIloPowerVoltage {
 	m := metricIloPowerVoltage{config: cfg}
+
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -476,6 +483,7 @@ func (m *metricIloStorageDriveHealth) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloStorageDriveHealth(cfg MetricConfig) metricIloStorageDriveHealth {
 	m := metricIloStorageDriveHealth{config: cfg}
+
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -527,6 +535,7 @@ func (m *metricIloSystemHealth) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloSystemHealth(cfg MetricConfig) metricIloSystemHealth {
 	m := metricIloSystemHealth{config: cfg}
+
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -578,6 +587,7 @@ func (m *metricIloSystemPowerState) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloSystemPowerState(cfg MetricConfig) metricIloSystemPowerState {
 	m := metricIloSystemPowerState{config: cfg}
+
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -633,6 +643,7 @@ func (m *metricIloThermalTemperature) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloThermalTemperature(cfg MetricConfig) metricIloThermalTemperature {
 	m := metricIloThermalTemperature{config: cfg}
+
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()

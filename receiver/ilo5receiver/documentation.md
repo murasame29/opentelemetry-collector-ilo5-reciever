@@ -56,6 +56,51 @@ Current power consumption in Watts.
 | ---- | ----------- | ------ | -------- |
 | chassis_id | Redfish Chassis ID. | Any Str | Recommended |
 
+### ilo.power.psu.health
+
+Power Supply Unit health (1=OK, 2=Warning, 3=Critical).
+
+| Unit | Metric Type | Value Type | Stability |
+| ---- | ----------- | ---------- | --------- |
+| {status} | Gauge | Int | Development |
+
+#### Attributes
+
+| Name | Description | Values | Requirement Level |
+| ---- | ----------- | ------ | -------- |
+| chassis_id | Redfish Chassis ID. | Any Str | Recommended |
+| psu_id | Power Supply Unit ID. | Any Str | Recommended |
+
+### ilo.power.psu.input_voltage
+
+Power Supply Unit input line voltage.
+
+| Unit | Metric Type | Value Type | Stability |
+| ---- | ----------- | ---------- | --------- |
+| V | Gauge | Double | Development |
+
+#### Attributes
+
+| Name | Description | Values | Requirement Level |
+| ---- | ----------- | ------ | -------- |
+| chassis_id | Redfish Chassis ID. | Any Str | Recommended |
+| psu_id | Power Supply Unit ID. | Any Str | Recommended |
+
+### ilo.power.psu.output
+
+Power Supply Unit output power in Watts.
+
+| Unit | Metric Type | Value Type | Stability |
+| ---- | ----------- | ---------- | --------- |
+| W | Gauge | Double | Development |
+
+#### Attributes
+
+| Name | Description | Values | Requirement Level |
+| ---- | ----------- | ------ | -------- |
+| chassis_id | Redfish Chassis ID. | Any Str | Recommended |
+| psu_id | Power Supply Unit ID. | Any Str | Recommended |
+
 ### ilo.power.voltage
 
 Voltage reading in Volts.
@@ -130,6 +175,8 @@ Temperature reading in Celsius.
 | chassis_id | Redfish Chassis ID. | Any Str | Recommended |
 | sensor_name | Name of the sensor (e.g., Ambient, CPU). | Any Str | Recommended |
 | physical_context | Physical context of the sensor (e.g., Intake, SystemBoard). | Any Str | Recommended |
+| location_x_mm | X coordinate of sensor location in millimeters. | Any Int | Recommended |
+| location_y_mm | Y coordinate of sensor location in millimeters. | Any Int | Recommended |
 
 ## Resource Attributes
 
