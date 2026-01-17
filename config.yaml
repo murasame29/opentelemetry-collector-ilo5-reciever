@@ -1,0 +1,17 @@
+receivers:
+  ilo5:
+    endpoint: "https://192.168.10.150"
+    username: "${env:ILO_USERNAME}"
+    password: "${env:ILO_PASSWORD}"
+    insecure_skip_verify: true
+    collection_interval: 60s
+
+exporters:
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    metrics:
+      receivers: [ilo5]
+      exporters: [debug]

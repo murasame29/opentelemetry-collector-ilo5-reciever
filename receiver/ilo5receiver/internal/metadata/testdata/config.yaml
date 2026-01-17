@@ -1,0 +1,115 @@
+default:
+all_set:
+  metrics:
+    ilo.fan.speed:
+      enabled: true
+    ilo.power.capacity:
+      enabled: true
+    ilo.power.consumption:
+      enabled: true
+    ilo.power.psu.output:
+      enabled: true
+    ilo.power.psu.input_voltage:
+      enabled: true
+    ilo.power.psu.health:
+      enabled: true
+    ilo.power.voltage:
+      enabled: true
+    ilo.storage.drive.health:
+      enabled: true
+    ilo.system.health:
+      enabled: true
+    ilo.system.power_state:
+      enabled: true
+    ilo.thermal.temperature:
+      enabled: true
+  resource_attributes:
+    host.name:
+      enabled: true
+    host.serial_number:
+      enabled: true
+    ilo.endpoint:
+      enabled: true
+    ilo.firmware.version:
+      enabled: true
+    ilo.model:
+      enabled: true
+none_set:
+  metrics:
+    ilo.fan.speed:
+      enabled: false
+    ilo.power.capacity:
+      enabled: false
+    ilo.power.consumption:
+      enabled: false
+    ilo.power.psu.output:
+      enabled: false
+    ilo.power.psu.input_voltage:
+      enabled: false
+    ilo.power.psu.health:
+      enabled: false
+    ilo.power.voltage:
+      enabled: false
+    ilo.storage.drive.health:
+      enabled: false
+    ilo.system.health:
+      enabled: false
+    ilo.system.power_state:
+      enabled: false
+    ilo.thermal.temperature:
+      enabled: false
+  resource_attributes:
+    host.name:
+      enabled: false
+    host.serial_number:
+      enabled: false
+    ilo.endpoint:
+      enabled: false
+    ilo.firmware.version:
+      enabled: false
+    ilo.model:
+      enabled: false
+filter_set_include:
+  resource_attributes:
+    host.name:
+      enabled: true
+      metrics_include:
+        - regexp: ".*"
+    host.serial_number:
+      enabled: true
+      metrics_include:
+        - regexp: ".*"
+    ilo.endpoint:
+      enabled: true
+      metrics_include:
+        - regexp: ".*"
+    ilo.firmware.version:
+      enabled: true
+      metrics_include:
+        - regexp: ".*"
+    ilo.model:
+      enabled: true
+      metrics_include:
+        - regexp: ".*"
+filter_set_exclude:
+  resource_attributes:
+    host.name:
+      enabled: true
+      metrics_exclude:
+        - strict: "host.name-val"
+    host.serial_number:
+      enabled: true
+      metrics_exclude:
+        - strict: "host.serial_number-val"
+    ilo.endpoint:
+      enabled: true
+      metrics_exclude:
+        - strict: "ilo.endpoint-val"
+    ilo.firmware.version:
+      enabled: true
+      metrics_exclude:
+        - strict: "ilo.firmware.version-val"
+    ilo.model:
+      enabled: true
+      metrics_exclude:
+        - strict: "ilo.model-val"

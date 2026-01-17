@@ -1,0 +1,37 @@
+receivers:
+  ilo5:
+    endpoint: "https://192.168.10.150"
+    username: "${env:ILO_USERNAME}"
+    password: "${env:ILO_PASSWORD}"
+    insecure_skip_verify: true
+    collection_interval: 60s
+
+processors:
+  batch:
+    timeout: 10s
+    send_batch_size: 1000
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+    spike_limit_mib: 128
+
+exporters:
+  debug:
+    verbosity: detailed
+
+  otlphttp:
+    endpoint: "https://otlp.nr-data.net"
+    headers:
+      api-key: "${env:NEW_RELIC_LICENSE_KEY}"
+
+extensions:
+  zpages:
+    endpoint: localhost:55679
+
+service:
+  extensions: [zpages]
+  pipelines:
+    metrics:
+      receivers: [ilo5]
+      processors: [memory_limiter, batch]
+      exporters: [otlphttp, debug]

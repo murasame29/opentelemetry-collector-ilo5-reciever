@@ -1,0 +1,24 @@
+# Binaries
+ilo5col
+ilo5-collector
+*.exe
+*.test
+
+# Logs
+debug.log
+*.log
+
+# Output
+dist/
+
+# Editor
+.vscode/
+.idea/
+
+# Go
+vendor/
+go.work
+go.work.sum
+
+# environment variables
+.env

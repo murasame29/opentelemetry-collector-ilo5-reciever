@@ -1,0 +1,176 @@
+type: ilo5
+status:
+  class: receiver
+  stability:
+    beta: [metrics]
+  distributions: [contrib]
+  codeowners:
+    active: [murasame29]
+
+resource_attributes:
+  host.name:
+    description: Hostname of the system.
+    type: string
+    enabled: true
+  host.serial_number:
+    description: Serial number of the host system.
+    type: string
+    enabled: true
+  ilo.endpoint:
+    description: Endpoint of the iLO5.
+    type: string
+    enabled: true
+  ilo.firmware.version:
+    description: Firmware version of the iLO.
+    type: string
+    enabled: true
+  ilo.model:
+    description: Model name of the iLO.
+    type: string
+    enabled: true
+
+attributes:
+  chassis_id:
+    description: Redfish Chassis ID.
+    type: string
+  controller_id:
+    description: Storage Controller ID.
+    type: string
+  drive_id:
+    description: Drive ID.
+    type: string
+  fan_id:
+    description: ID of the fan.
+    type: string
+  fan_name:
+    description: Name of the fan.
+    type: string
+  physical_context:
+    description: Physical context of the sensor (e.g., Intake, SystemBoard).
+    type: string
+  psu_id:
+    description: Power Supply Unit ID.
+    type: string
+  sensor_name:
+    description: Name of the sensor (e.g., Ambient, CPU).
+    type: string
+  system_id:
+    description: Redfish System ID.
+    type: string
+  location_x_mm:
+    description: X coordinate of sensor location in millimeters.
+    type: int
+  location_y_mm:
+    description: Y coordinate of sensor location in millimeters.
+    type: int
+
+metrics:
+  ilo.fan.speed:
+    enabled: true
+    description: Fan speed percentage.
+    unit: "%"
+    gauge:
+      value_type: double
+    attributes: [chassis_id, fan_name, fan_id]
+    stability:
+      level: development
+
+  ilo.power.capacity:
+    enabled: true
+    description: Power capacity in Watts.
+    unit: W
+    gauge:
+      value_type: double
+    attributes: [chassis_id]
+    stability:
+      level: development
+
+  ilo.power.consumption:
+    enabled: true
+    description: Current power consumption in Watts.
+    unit: W
+    gauge:
+      value_type: double
+    attributes: [chassis_id]
+    stability:
+      level: development
+
+  ilo.power.voltage:
+    enabled: true
+    description: Voltage reading in Volts.
+    unit: V
+    gauge:
+      value_type: double
+    attributes: [chassis_id, psu_id]
+    stability:
+      level: development
+
+  ilo.power.psu.output:
+    enabled: true
+    description: Power Supply Unit output power in Watts.
+    unit: W
+    gauge:
+      value_type: double
+    attributes: [chassis_id, psu_id]
+    stability:
+      level: development
+
+  ilo.power.psu.input_voltage:
+    enabled: true
+    description: Power Supply Unit input line voltage.
+    unit: V
+    gauge:
+      value_type: double
+    attributes: [chassis_id, psu_id]
+    stability:
+      level: development
+
+  ilo.power.psu.health:
+    enabled: true
+    description: Power Supply Unit health (1=OK, 2=Warning, 3=Critical).
+    unit: "{status}"
+    gauge:
+      value_type: int
+    attributes: [chassis_id, psu_id]
+    stability:
+      level: development
+
+  ilo.storage.drive.health:
+    enabled: true
+    description: Drive Health Status (1=OK, 2=Warning, 3=Critical).
+    unit: "{status}"
+    gauge:
+      value_type: int
+    attributes: [system_id, controller_id, drive_id]
+    stability:
+      level: development
+
+  ilo.system.health:
+    enabled: true
+    description: System Health Status (1=OK, 2=Warning, 3=Critical).
+    unit: "{status}"
+    gauge:
+      value_type: int
+    attributes: [system_id]
+    stability:
+      level: development
+
+  ilo.system.power_state:
+    enabled: true
+    description: System Power State (1=On, 0=Off/Other).
+    unit: "{state}"
+    gauge:
+      value_type: int
+    attributes: [system_id]
+    stability:
+      level: development
+
+  ilo.thermal.temperature:
+    enabled: true
+    description: Temperature reading in Celsius.
+    unit: Cel
+    gauge:
+      value_type: double
+    attributes: [chassis_id, sensor_name, physical_context, location_x_mm, location_y_mm]
+    stability:
+      level: development

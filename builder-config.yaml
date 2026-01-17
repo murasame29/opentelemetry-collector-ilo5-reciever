@@ -1,0 +1,21 @@
+dist:
+  name: ilo5-collector
+  description: OpenTelemetry Collector with iLO5 receiver for New Relic
+  output_path: ./dist
+  otelcol_version: 0.143.0
+
+receivers:
+  - gomod: github.com/murasame29/ilo5-receiver/receiver/ilo5receiver v0.0.0
+    path: ./receiver/ilo5receiver
+
+exporters:
+  - gomod: go.opentelemetry.io/collector/exporter/debugexporter v0.143.0
+  - gomod: go.opentelemetry.io/collector/exporter/otlpexporter v0.143.0
+  - gomod: go.opentelemetry.io/collector/exporter/otlphttpexporter v0.143.0
+
+processors:
+  - gomod: go.opentelemetry.io/collector/processor/batchprocessor v0.143.0
+  - gomod: go.opentelemetry.io/collector/processor/memorylimiterprocessor v0.143.0
+
+extensions:
+  - gomod: go.opentelemetry.io/collector/extension/zpagesextension v0.143.0
