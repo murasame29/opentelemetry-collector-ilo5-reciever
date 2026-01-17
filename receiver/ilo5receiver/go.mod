@@ -1,4 +1,4 @@
-module github.com/murasame29/opentelemetry-collector-ilo5-reciever
+module github.com/murasame29/opentelemetry-collector-ilo5-reciever/receiver/ilo5receiver
 
 go 1.25.0
 

@@ -1,4 +1,7 @@
 type: ilo5
+
+sem_conv_version: 1.27.0
+
 status:
   class: receiver
   stability:
@@ -45,6 +48,12 @@ attributes:
   fan_name:
     description: Name of the fan.
     type: string
+  location_x_mm:
+    description: X coordinate of sensor location in millimeters.
+    type: int
+  location_y_mm:
+    description: Y coordinate of sensor location in millimeters.
+    type: int
   physical_context:
     description: Physical context of the sensor (e.g., Intake, SystemBoard).
     type: string
@@ -57,12 +66,6 @@ attributes:
   system_id:
     description: Redfish System ID.
     type: string
-  location_x_mm:
-    description: X coordinate of sensor location in millimeters.
-    type: int
-  location_y_mm:
-    description: Y coordinate of sensor location in millimeters.
-    type: int
 
 metrics:
   ilo.fan.speed:
@@ -95,9 +98,19 @@ metrics:
     stability:
       level: development
 
-  ilo.power.voltage:
+  ilo.power.psu.health:
     enabled: true
-    description: Voltage reading in Volts.
+    description: Power Supply Unit health (1=OK, 2=Warning, 3=Critical).
+    unit: "{status}"
+    gauge:
+      value_type: int
+    attributes: [chassis_id, psu_id]
+    stability:
+      level: development
+
+  ilo.power.psu.input_voltage:
+    enabled: true
+    description: Power Supply Unit input line voltage.
     unit: V
     gauge:
       value_type: double
@@ -115,22 +128,12 @@ metrics:
     stability:
       level: development
 
-  ilo.power.psu.input_voltage:
+  ilo.power.voltage:
     enabled: true
-    description: Power Supply Unit input line voltage.
+    description: Voltage reading in Volts.
     unit: V
     gauge:
       value_type: double
-    attributes: [chassis_id, psu_id]
-    stability:
-      level: development
-
-  ilo.power.psu.health:
-    enabled: true
-    description: Power Supply Unit health (1=OK, 2=Warning, 3=Critical).
-    unit: "{status}"
-    gauge:
-      value_type: int
     attributes: [chassis_id, psu_id]
     stability:
       level: development

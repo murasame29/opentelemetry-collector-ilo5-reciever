@@ -12,8 +12,8 @@ import (
 	"go.opentelemetry.io/collector/receiver"
 	"go.opentelemetry.io/collector/scraper"
 
-	"github.com/murasame29/opentelemetry-collector-ilo5-reciever/internal/ilo"
-	"github.com/murasame29/opentelemetry-collector-ilo5-reciever/internal/metadata"
+	"github.com/murasame29/opentelemetry-collector-ilo5-reciever/receiver/ilo5receiver/internal/ilo"
+	"github.com/murasame29/opentelemetry-collector-ilo5-reciever/receiver/ilo5receiver/internal/metadata"
 )
 
 type iloScraper struct {

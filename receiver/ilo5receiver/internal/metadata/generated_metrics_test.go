@@ -62,6 +62,7 @@ func TestMetricsBuilder(t *testing.T) {
 			mb := NewMetricsBuilder(loadMetricsBuilderConfig(t, tt.name), settings, WithStartTime(start))
 
 			expectedWarnings := 0
+
 			assert.Equal(t, expectedWarnings, observedLogs.Len())
 
 			defaultMetricsCount := 0
@@ -81,6 +82,18 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
+			mb.RecordIloPowerPsuHealthDataPoint(ts, 1, "chassis_id-val", "psu_id-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordIloPowerPsuInputVoltageDataPoint(ts, 1, "chassis_id-val", "psu_id-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordIloPowerPsuOutputDataPoint(ts, 1, "chassis_id-val", "psu_id-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
 			mb.RecordIloPowerVoltageDataPoint(ts, 1, "chassis_id-val", "psu_id-val")
 
 			defaultMetricsCount++
@@ -97,19 +110,7 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordIloPowerPsuOutputDataPoint(ts, 1, "chassis_id-val", "psu_id-val")
-
-			defaultMetricsCount++
-			allMetricsCount++
-			mb.RecordIloPowerPsuInputVoltageDataPoint(ts, 1, "chassis_id-val", "psu_id-val")
-
-			defaultMetricsCount++
-			allMetricsCount++
-			mb.RecordIloPowerPsuHealthDataPoint(ts, 1, "chassis_id-val", "psu_id-val")
-
-			defaultMetricsCount++
-			allMetricsCount++
-			mb.RecordIloThermalTemperatureDataPoint(ts, 1, "chassis_id-val", "sensor_name-val", "physical_context-val", 10, 20)
+			mb.RecordIloThermalTemperatureDataPoint(ts, 1, "chassis_id-val", "sensor_name-val", "physical_context-val", 13, 13)
 
 			rb := mb.NewResourceBuilder()
 			rb.SetHostName("host.name-val")
@@ -190,6 +191,60 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok := dp.Attributes().Get("chassis_id")
 					assert.True(t, ok)
 					assert.Equal(t, "chassis_id-val", attrVal.Str())
+				case "ilo.power.psu.health":
+					assert.False(t, validatedMetrics["ilo.power.psu.health"], "Found a duplicate in the metrics slice: ilo.power.psu.health")
+					validatedMetrics["ilo.power.psu.health"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Power Supply Unit health (1=OK, 2=Warning, 3=Critical).", ms.At(i).Description())
+					assert.Equal(t, "{status}", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+					attrVal, ok := dp.Attributes().Get("chassis_id")
+					assert.True(t, ok)
+					assert.Equal(t, "chassis_id-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("psu_id")
+					assert.True(t, ok)
+					assert.Equal(t, "psu_id-val", attrVal.Str())
+				case "ilo.power.psu.input_voltage":
+					assert.False(t, validatedMetrics["ilo.power.psu.input_voltage"], "Found a duplicate in the metrics slice: ilo.power.psu.input_voltage")
+					validatedMetrics["ilo.power.psu.input_voltage"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Power Supply Unit input line voltage.", ms.At(i).Description())
+					assert.Equal(t, "V", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
+					assert.InDelta(t, float64(1), dp.DoubleValue(), 0.01)
+					attrVal, ok := dp.Attributes().Get("chassis_id")
+					assert.True(t, ok)
+					assert.Equal(t, "chassis_id-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("psu_id")
+					assert.True(t, ok)
+					assert.Equal(t, "psu_id-val", attrVal.Str())
+				case "ilo.power.psu.output":
+					assert.False(t, validatedMetrics["ilo.power.psu.output"], "Found a duplicate in the metrics slice: ilo.power.psu.output")
+					validatedMetrics["ilo.power.psu.output"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Power Supply Unit output power in Watts.", ms.At(i).Description())
+					assert.Equal(t, "W", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
+					assert.InDelta(t, float64(1), dp.DoubleValue(), 0.01)
+					attrVal, ok := dp.Attributes().Get("chassis_id")
+					assert.True(t, ok)
+					assert.Equal(t, "chassis_id-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("psu_id")
+					assert.True(t, ok)
+					assert.Equal(t, "psu_id-val", attrVal.Str())
 				case "ilo.power.voltage":
 					assert.False(t, validatedMetrics["ilo.power.voltage"], "Found a duplicate in the metrics slice: ilo.power.voltage")
 					validatedMetrics["ilo.power.voltage"] = true
@@ -282,32 +337,10 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, "physical_context-val", attrVal.Str())
 					attrVal, ok = dp.Attributes().Get("location_x_mm")
 					assert.True(t, ok)
-					assert.Equal(t, int64(10), attrVal.Int())
+					assert.EqualValues(t, 13, attrVal.Int())
 					attrVal, ok = dp.Attributes().Get("location_y_mm")
 					assert.True(t, ok)
-					assert.Equal(t, int64(20), attrVal.Int())
-				case "ilo.power.psu.output":
-					assert.False(t, validatedMetrics["ilo.power.psu.output"], "Found a duplicate in the metrics slice: ilo.power.psu.output")
-					validatedMetrics["ilo.power.psu.output"] = true
-					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
-					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
-					dp := ms.At(i).Gauge().DataPoints().At(0)
-					attrVal, ok := dp.Attributes().Get("chassis_id")
-					assert.True(t, ok)
-					assert.Equal(t, "chassis_id-val", attrVal.Str())
-					attrVal, ok = dp.Attributes().Get("psu_id")
-					assert.True(t, ok)
-					assert.Equal(t, "psu_id-val", attrVal.Str())
-				case "ilo.power.psu.input_voltage":
-					assert.False(t, validatedMetrics["ilo.power.psu.input_voltage"], "Found a duplicate in the metrics slice: ilo.power.psu.input_voltage")
-					validatedMetrics["ilo.power.psu.input_voltage"] = true
-					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
-					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
-				case "ilo.power.psu.health":
-					assert.False(t, validatedMetrics["ilo.power.psu.health"], "Found a duplicate in the metrics slice: ilo.power.psu.health")
-					validatedMetrics["ilo.power.psu.health"] = true
-					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
-					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.EqualValues(t, 13, attrVal.Int())
 				}
 			}
 		})

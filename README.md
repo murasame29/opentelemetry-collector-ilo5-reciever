@@ -33,7 +33,7 @@ HPE iLO5 からメトリクスを収集する OpenTelemetry Collector Receiver �
 ## Installation
 
 ```bash
-go get github.com/murasame29/opentelemetry-collector-ilo5-reciever
+go get github.com/murasame29/opentelemetry-collector-ilo5-reciever/receiver/ilo5receiver
 ```
 
 ## Configuration
@@ -90,7 +90,7 @@ Add to your `builder-config.yaml`:
 
 ```yaml
 receivers:
-  - gomod: github.com/murasame29/opentelemetry-collector-ilo5-reciever v0.1.0
+  - gomod: github.com/murasame29/opentelemetry-collector-ilo5-reciever/receiver/ilo5receiver v0.1.0
 ```
 
 ### Example Collector Config

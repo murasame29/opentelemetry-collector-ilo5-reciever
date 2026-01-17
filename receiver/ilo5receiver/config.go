@@ -4,7 +4,7 @@ import (
 	"go.opentelemetry.io/collector/config/configopaque"
 	"go.opentelemetry.io/collector/scraper/scraperhelper"
 
-	"github.com/murasame29/opentelemetry-collector-ilo5-reciever/internal/metadata"
+	"github.com/murasame29/opentelemetry-collector-ilo5-reciever/receiver/ilo5receiver/internal/metadata"
 )
 
 // Config defines the configuration for the receiver.

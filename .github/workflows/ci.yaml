@@ -10,6 +10,9 @@ jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: receiver/ilo5receiver
     steps:
     - name: Check out code
       uses: actions/checkout@v4
@@ -32,6 +35,9 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: receiver/ilo5receiver
     steps:
     - name: Check out code
       uses: actions/checkout@v4
@@ -46,3 +52,4 @@ jobs:
       uses: golangci/golangci-lint-action@v6
       with:
         version: latest
+        working-directory: receiver/ilo5receiver

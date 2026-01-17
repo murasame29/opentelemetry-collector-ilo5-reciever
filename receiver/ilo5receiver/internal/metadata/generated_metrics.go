@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/receiver"
+	conventions "go.opentelemetry.io/otel/semconv/v1.27.0"
 )
 
 var MetricsInfo = metricsInfo{
@@ -22,14 +23,14 @@ var MetricsInfo = metricsInfo{
 	IloPowerConsumption: metricInfo{
 		Name: "ilo.power.consumption",
 	},
-	IloPowerPsuOutput: metricInfo{
-		Name: "ilo.power.psu.output",
+	IloPowerPsuHealth: metricInfo{
+		Name: "ilo.power.psu.health",
 	},
 	IloPowerPsuInputVoltage: metricInfo{
 		Name: "ilo.power.psu.input_voltage",
 	},
-	IloPowerPsuHealth: metricInfo{
-		Name: "ilo.power.psu.health",
+	IloPowerPsuOutput: metricInfo{
+		Name: "ilo.power.psu.output",
 	},
 	IloPowerVoltage: metricInfo{
 		Name: "ilo.power.voltage",
@@ -52,9 +53,9 @@ type metricsInfo struct {
 	IloFanSpeed             metricInfo
 	IloPowerCapacity        metricInfo
 	IloPowerConsumption     metricInfo
-	IloPowerPsuOutput       metricInfo
-	IloPowerPsuInputVoltage metricInfo
 	IloPowerPsuHealth       metricInfo
+	IloPowerPsuInputVoltage metricInfo
+	IloPowerPsuOutput       metricInfo
 	IloPowerVoltage         metricInfo
 	IloStorageDriveHealth   metricInfo
 	IloSystemHealth         metricInfo
@@ -112,7 +113,6 @@ func (m *metricIloFanSpeed) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloFanSpeed(cfg MetricConfig) metricIloFanSpeed {
 	m := metricIloFanSpeed{config: cfg}
-
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -164,7 +164,6 @@ func (m *metricIloPowerCapacity) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloPowerCapacity(cfg MetricConfig) metricIloPowerCapacity {
 	m := metricIloPowerCapacity{config: cfg}
-
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -216,7 +215,162 @@ func (m *metricIloPowerConsumption) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloPowerConsumption(cfg MetricConfig) metricIloPowerConsumption {
 	m := metricIloPowerConsumption{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
 
+type metricIloPowerPsuHealth struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills ilo.power.psu.health metric with initial data.
+func (m *metricIloPowerPsuHealth) init() {
+	m.data.SetName("ilo.power.psu.health")
+	m.data.SetDescription("Power Supply Unit health (1=OK, 2=Warning, 3=Critical).")
+	m.data.SetUnit("{status}")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricIloPowerPsuHealth) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, chassisIDAttributeValue string, psuIDAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+	dp.Attributes().PutStr("chassis_id", chassisIDAttributeValue)
+	dp.Attributes().PutStr("psu_id", psuIDAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricIloPowerPsuHealth) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricIloPowerPsuHealth) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricIloPowerPsuHealth(cfg MetricConfig) metricIloPowerPsuHealth {
+	m := metricIloPowerPsuHealth{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricIloPowerPsuInputVoltage struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills ilo.power.psu.input_voltage metric with initial data.
+func (m *metricIloPowerPsuInputVoltage) init() {
+	m.data.SetName("ilo.power.psu.input_voltage")
+	m.data.SetDescription("Power Supply Unit input line voltage.")
+	m.data.SetUnit("V")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricIloPowerPsuInputVoltage) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, chassisIDAttributeValue string, psuIDAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetDoubleValue(val)
+	dp.Attributes().PutStr("chassis_id", chassisIDAttributeValue)
+	dp.Attributes().PutStr("psu_id", psuIDAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricIloPowerPsuInputVoltage) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricIloPowerPsuInputVoltage) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricIloPowerPsuInputVoltage(cfg MetricConfig) metricIloPowerPsuInputVoltage {
+	m := metricIloPowerPsuInputVoltage{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricIloPowerPsuOutput struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills ilo.power.psu.output metric with initial data.
+func (m *metricIloPowerPsuOutput) init() {
+	m.data.SetName("ilo.power.psu.output")
+	m.data.SetDescription("Power Supply Unit output power in Watts.")
+	m.data.SetUnit("W")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricIloPowerPsuOutput) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, chassisIDAttributeValue string, psuIDAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetDoubleValue(val)
+	dp.Attributes().PutStr("chassis_id", chassisIDAttributeValue)
+	dp.Attributes().PutStr("psu_id", psuIDAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricIloPowerPsuOutput) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricIloPowerPsuOutput) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricIloPowerPsuOutput(cfg MetricConfig) metricIloPowerPsuOutput {
+	m := metricIloPowerPsuOutput{config: cfg}
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -269,154 +423,6 @@ func (m *metricIloPowerVoltage) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloPowerVoltage(cfg MetricConfig) metricIloPowerVoltage {
 	m := metricIloPowerVoltage{config: cfg}
-
-	if cfg.Enabled {
-		m.data = pmetric.NewMetric()
-		m.init()
-	}
-	return m
-}
-
-type metricIloPowerPsuOutput struct {
-	data     pmetric.Metric
-	config   MetricConfig
-	capacity int
-}
-
-func (m *metricIloPowerPsuOutput) init() {
-	m.data.SetName("ilo.power.psu.output")
-	m.data.SetDescription("Power Supply Unit output power in Watts.")
-	m.data.SetUnit("W")
-	m.data.SetEmptyGauge()
-	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
-}
-
-func (m *metricIloPowerPsuOutput) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, chassisIDAttributeValue string, psuIDAttributeValue string) {
-	if !m.config.Enabled {
-		return
-	}
-	dp := m.data.Gauge().DataPoints().AppendEmpty()
-	dp.SetStartTimestamp(start)
-	dp.SetTimestamp(ts)
-	dp.SetDoubleValue(val)
-	dp.Attributes().PutStr("chassis_id", chassisIDAttributeValue)
-	dp.Attributes().PutStr("psu_id", psuIDAttributeValue)
-}
-
-func (m *metricIloPowerPsuOutput) updateCapacity() {
-	if m.data.Gauge().DataPoints().Len() > m.capacity {
-		m.capacity = m.data.Gauge().DataPoints().Len()
-	}
-}
-
-func (m *metricIloPowerPsuOutput) emit(metrics pmetric.MetricSlice) {
-	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
-		m.updateCapacity()
-		m.data.MoveTo(metrics.AppendEmpty())
-		m.init()
-	}
-}
-
-func newMetricIloPowerPsuOutput(cfg MetricConfig) metricIloPowerPsuOutput {
-	m := metricIloPowerPsuOutput{config: cfg}
-	if cfg.Enabled {
-		m.data = pmetric.NewMetric()
-		m.init()
-	}
-	return m
-}
-
-type metricIloPowerPsuInputVoltage struct {
-	data     pmetric.Metric
-	config   MetricConfig
-	capacity int
-}
-
-func (m *metricIloPowerPsuInputVoltage) init() {
-	m.data.SetName("ilo.power.psu.input_voltage")
-	m.data.SetDescription("Power Supply Unit input line voltage.")
-	m.data.SetUnit("V")
-	m.data.SetEmptyGauge()
-	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
-}
-
-func (m *metricIloPowerPsuInputVoltage) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, chassisIDAttributeValue string, psuIDAttributeValue string) {
-	if !m.config.Enabled {
-		return
-	}
-	dp := m.data.Gauge().DataPoints().AppendEmpty()
-	dp.SetStartTimestamp(start)
-	dp.SetTimestamp(ts)
-	dp.SetDoubleValue(val)
-	dp.Attributes().PutStr("chassis_id", chassisIDAttributeValue)
-	dp.Attributes().PutStr("psu_id", psuIDAttributeValue)
-}
-
-func (m *metricIloPowerPsuInputVoltage) updateCapacity() {
-	if m.data.Gauge().DataPoints().Len() > m.capacity {
-		m.capacity = m.data.Gauge().DataPoints().Len()
-	}
-}
-
-func (m *metricIloPowerPsuInputVoltage) emit(metrics pmetric.MetricSlice) {
-	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
-		m.updateCapacity()
-		m.data.MoveTo(metrics.AppendEmpty())
-		m.init()
-	}
-}
-
-func newMetricIloPowerPsuInputVoltage(cfg MetricConfig) metricIloPowerPsuInputVoltage {
-	m := metricIloPowerPsuInputVoltage{config: cfg}
-	if cfg.Enabled {
-		m.data = pmetric.NewMetric()
-		m.init()
-	}
-	return m
-}
-
-type metricIloPowerPsuHealth struct {
-	data     pmetric.Metric
-	config   MetricConfig
-	capacity int
-}
-
-func (m *metricIloPowerPsuHealth) init() {
-	m.data.SetName("ilo.power.psu.health")
-	m.data.SetDescription("Power Supply Unit health (1=OK, 2=Warning, 3=Critical).")
-	m.data.SetUnit("{status}")
-	m.data.SetEmptyGauge()
-	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
-}
-
-func (m *metricIloPowerPsuHealth) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, chassisIDAttributeValue string, psuIDAttributeValue string) {
-	if !m.config.Enabled {
-		return
-	}
-	dp := m.data.Gauge().DataPoints().AppendEmpty()
-	dp.SetStartTimestamp(start)
-	dp.SetTimestamp(ts)
-	dp.SetIntValue(val)
-	dp.Attributes().PutStr("chassis_id", chassisIDAttributeValue)
-	dp.Attributes().PutStr("psu_id", psuIDAttributeValue)
-}
-
-func (m *metricIloPowerPsuHealth) updateCapacity() {
-	if m.data.Gauge().DataPoints().Len() > m.capacity {
-		m.capacity = m.data.Gauge().DataPoints().Len()
-	}
-}
-
-func (m *metricIloPowerPsuHealth) emit(metrics pmetric.MetricSlice) {
-	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
-		m.updateCapacity()
-		m.data.MoveTo(metrics.AppendEmpty())
-		m.init()
-	}
-}
-
-func newMetricIloPowerPsuHealth(cfg MetricConfig) metricIloPowerPsuHealth {
-	m := metricIloPowerPsuHealth{config: cfg}
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -470,7 +476,6 @@ func (m *metricIloStorageDriveHealth) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloStorageDriveHealth(cfg MetricConfig) metricIloStorageDriveHealth {
 	m := metricIloStorageDriveHealth{config: cfg}
-
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -522,7 +527,6 @@ func (m *metricIloSystemHealth) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloSystemHealth(cfg MetricConfig) metricIloSystemHealth {
 	m := metricIloSystemHealth{config: cfg}
-
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -574,7 +578,6 @@ func (m *metricIloSystemPowerState) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloSystemPowerState(cfg MetricConfig) metricIloSystemPowerState {
 	m := metricIloSystemPowerState{config: cfg}
-
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -597,7 +600,7 @@ func (m *metricIloThermalTemperature) init() {
 	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricIloThermalTemperature) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, chassisIDAttributeValue string, sensorNameAttributeValue string, physicalContextAttributeValue string, locationXmm int64, locationYmm int64) {
+func (m *metricIloThermalTemperature) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, chassisIDAttributeValue string, sensorNameAttributeValue string, physicalContextAttributeValue string, locationXMmAttributeValue int64, locationYMmAttributeValue int64) {
 	if !m.config.Enabled {
 		return
 	}
@@ -608,8 +611,8 @@ func (m *metricIloThermalTemperature) recordDataPoint(start pcommon.Timestamp, t
 	dp.Attributes().PutStr("chassis_id", chassisIDAttributeValue)
 	dp.Attributes().PutStr("sensor_name", sensorNameAttributeValue)
 	dp.Attributes().PutStr("physical_context", physicalContextAttributeValue)
-	dp.Attributes().PutInt("location_x_mm", locationXmm)
-	dp.Attributes().PutInt("location_y_mm", locationYmm)
+	dp.Attributes().PutInt("location_x_mm", locationXMmAttributeValue)
+	dp.Attributes().PutInt("location_y_mm", locationYMmAttributeValue)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
@@ -630,7 +633,6 @@ func (m *metricIloThermalTemperature) emit(metrics pmetric.MetricSlice) {
 
 func newMetricIloThermalTemperature(cfg MetricConfig) metricIloThermalTemperature {
 	m := metricIloThermalTemperature{config: cfg}
-
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -651,9 +653,9 @@ type MetricsBuilder struct {
 	metricIloFanSpeed              metricIloFanSpeed
 	metricIloPowerCapacity         metricIloPowerCapacity
 	metricIloPowerConsumption      metricIloPowerConsumption
-	metricIloPowerPsuOutput        metricIloPowerPsuOutput
-	metricIloPowerPsuInputVoltage  metricIloPowerPsuInputVoltage
 	metricIloPowerPsuHealth        metricIloPowerPsuHealth
+	metricIloPowerPsuInputVoltage  metricIloPowerPsuInputVoltage
+	metricIloPowerPsuOutput        metricIloPowerPsuOutput
 	metricIloPowerVoltage          metricIloPowerVoltage
 	metricIloStorageDriveHealth    metricIloStorageDriveHealth
 	metricIloSystemHealth          metricIloSystemHealth
@@ -687,9 +689,9 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings receiver.Settings, opt
 		metricIloFanSpeed:              newMetricIloFanSpeed(mbc.Metrics.IloFanSpeed),
 		metricIloPowerCapacity:         newMetricIloPowerCapacity(mbc.Metrics.IloPowerCapacity),
 		metricIloPowerConsumption:      newMetricIloPowerConsumption(mbc.Metrics.IloPowerConsumption),
-		metricIloPowerPsuOutput:        newMetricIloPowerPsuOutput(mbc.Metrics.IloPowerPsuOutput),
-		metricIloPowerPsuInputVoltage:  newMetricIloPowerPsuInputVoltage(mbc.Metrics.IloPowerPsuInputVoltage),
 		metricIloPowerPsuHealth:        newMetricIloPowerPsuHealth(mbc.Metrics.IloPowerPsuHealth),
+		metricIloPowerPsuInputVoltage:  newMetricIloPowerPsuInputVoltage(mbc.Metrics.IloPowerPsuInputVoltage),
+		metricIloPowerPsuOutput:        newMetricIloPowerPsuOutput(mbc.Metrics.IloPowerPsuOutput),
 		metricIloPowerVoltage:          newMetricIloPowerVoltage(mbc.Metrics.IloPowerVoltage),
 		metricIloStorageDriveHealth:    newMetricIloStorageDriveHealth(mbc.Metrics.IloStorageDriveHealth),
 		metricIloSystemHealth:          newMetricIloSystemHealth(mbc.Metrics.IloSystemHealth),
@@ -793,6 +795,7 @@ func WithStartTimeOverride(start pcommon.Timestamp) ResourceMetricsOption {
 // Resource attributes should be provided as ResourceMetricsOption arguments.
 func (mb *MetricsBuilder) EmitForResource(options ...ResourceMetricsOption) {
 	rm := pmetric.NewResourceMetrics()
+	rm.SetSchemaUrl(conventions.SchemaURL)
 	ils := rm.ScopeMetrics().AppendEmpty()
 	ils.Scope().SetName(ScopeName)
 	ils.Scope().SetVersion(mb.buildInfo.Version)
@@ -800,9 +803,9 @@ func (mb *MetricsBuilder) EmitForResource(options ...ResourceMetricsOption) {
 	mb.metricIloFanSpeed.emit(ils.Metrics())
 	mb.metricIloPowerCapacity.emit(ils.Metrics())
 	mb.metricIloPowerConsumption.emit(ils.Metrics())
-	mb.metricIloPowerPsuOutput.emit(ils.Metrics())
-	mb.metricIloPowerPsuInputVoltage.emit(ils.Metrics())
 	mb.metricIloPowerPsuHealth.emit(ils.Metrics())
+	mb.metricIloPowerPsuInputVoltage.emit(ils.Metrics())
+	mb.metricIloPowerPsuOutput.emit(ils.Metrics())
 	mb.metricIloPowerVoltage.emit(ils.Metrics())
 	mb.metricIloStorageDriveHealth.emit(ils.Metrics())
 	mb.metricIloSystemHealth.emit(ils.Metrics())
@@ -854,14 +857,9 @@ func (mb *MetricsBuilder) RecordIloPowerConsumptionDataPoint(ts pcommon.Timestam
 	mb.metricIloPowerConsumption.recordDataPoint(mb.startTime, ts, val, chassisIDAttributeValue)
 }
 
-// RecordIloPowerVoltageDataPoint adds a data point to ilo.power.voltage metric.
-func (mb *MetricsBuilder) RecordIloPowerVoltageDataPoint(ts pcommon.Timestamp, val float64, chassisIDAttributeValue string, psuIDAttributeValue string) {
-	mb.metricIloPowerVoltage.recordDataPoint(mb.startTime, ts, val, chassisIDAttributeValue, psuIDAttributeValue)
-}
-
-// RecordIloPowerPsuOutputDataPoint adds a data point to ilo.power.psu.output metric.
-func (mb *MetricsBuilder) RecordIloPowerPsuOutputDataPoint(ts pcommon.Timestamp, val float64, chassisIDAttributeValue string, psuIDAttributeValue string) {
-	mb.metricIloPowerPsuOutput.recordDataPoint(mb.startTime, ts, val, chassisIDAttributeValue, psuIDAttributeValue)
+// RecordIloPowerPsuHealthDataPoint adds a data point to ilo.power.psu.health metric.
+func (mb *MetricsBuilder) RecordIloPowerPsuHealthDataPoint(ts pcommon.Timestamp, val int64, chassisIDAttributeValue string, psuIDAttributeValue string) {
+	mb.metricIloPowerPsuHealth.recordDataPoint(mb.startTime, ts, val, chassisIDAttributeValue, psuIDAttributeValue)
 }
 
 // RecordIloPowerPsuInputVoltageDataPoint adds a data point to ilo.power.psu.input_voltage metric.
@@ -869,9 +867,14 @@ func (mb *MetricsBuilder) RecordIloPowerPsuInputVoltageDataPoint(ts pcommon.Time
 	mb.metricIloPowerPsuInputVoltage.recordDataPoint(mb.startTime, ts, val, chassisIDAttributeValue, psuIDAttributeValue)
 }
 
-// RecordIloPowerPsuHealthDataPoint adds a data point to ilo.power.psu.health metric.
-func (mb *MetricsBuilder) RecordIloPowerPsuHealthDataPoint(ts pcommon.Timestamp, val int64, chassisIDAttributeValue string, psuIDAttributeValue string) {
-	mb.metricIloPowerPsuHealth.recordDataPoint(mb.startTime, ts, val, chassisIDAttributeValue, psuIDAttributeValue)
+// RecordIloPowerPsuOutputDataPoint adds a data point to ilo.power.psu.output metric.
+func (mb *MetricsBuilder) RecordIloPowerPsuOutputDataPoint(ts pcommon.Timestamp, val float64, chassisIDAttributeValue string, psuIDAttributeValue string) {
+	mb.metricIloPowerPsuOutput.recordDataPoint(mb.startTime, ts, val, chassisIDAttributeValue, psuIDAttributeValue)
+}
+
+// RecordIloPowerVoltageDataPoint adds a data point to ilo.power.voltage metric.
+func (mb *MetricsBuilder) RecordIloPowerVoltageDataPoint(ts pcommon.Timestamp, val float64, chassisIDAttributeValue string, psuIDAttributeValue string) {
+	mb.metricIloPowerVoltage.recordDataPoint(mb.startTime, ts, val, chassisIDAttributeValue, psuIDAttributeValue)
 }
 
 // RecordIloStorageDriveHealthDataPoint adds a data point to ilo.storage.drive.health metric.
@@ -890,8 +893,8 @@ func (mb *MetricsBuilder) RecordIloSystemPowerStateDataPoint(ts pcommon.Timestam
 }
 
 // RecordIloThermalTemperatureDataPoint adds a data point to ilo.thermal.temperature metric.
-func (mb *MetricsBuilder) RecordIloThermalTemperatureDataPoint(ts pcommon.Timestamp, val float64, chassisIDAttributeValue string, sensorNameAttributeValue string, physicalContextAttributeValue string, locationXmm int64, locationYmm int64) {
-	mb.metricIloThermalTemperature.recordDataPoint(mb.startTime, ts, val, chassisIDAttributeValue, sensorNameAttributeValue, physicalContextAttributeValue, locationXmm, locationYmm)
+func (mb *MetricsBuilder) RecordIloThermalTemperatureDataPoint(ts pcommon.Timestamp, val float64, chassisIDAttributeValue string, sensorNameAttributeValue string, physicalContextAttributeValue string, locationXMmAttributeValue int64, locationYMmAttributeValue int64) {
+	mb.metricIloThermalTemperature.recordDataPoint(mb.startTime, ts, val, chassisIDAttributeValue, sensorNameAttributeValue, physicalContextAttributeValue, locationXMmAttributeValue, locationYMmAttributeValue)
 }
 
 // Reset resets metrics builder to its initial state. It should be used when external metrics source is restarted,

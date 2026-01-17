@@ -1,26 +1,23 @@
-.PHONY: build test lint generate clean
+.PHONY: build test test-coverage lint clean
+
+RECEIVER_DIR := receiver/ilo5receiver
 
 # Build
 build:
-	go build -v ./...
+	cd $(RECEIVER_DIR) && go build -v ./...
 
 # Test
 test:
-	go test -v -race ./...
+	cd $(RECEIVER_DIR) && go test -v -race ./...
 
 # Test with coverage
 test-coverage:
-	go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+	cd $(RECEIVER_DIR) && go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
 
 # Lint
 lint:
-	golangci-lint run ./...
-
-# Generate metadata (requires mdatagen)
-generate:
-	go install go.opentelemetry.io/collector/cmd/mdatagen@latest
-	mdatagen metadata.yaml
+	cd $(RECEIVER_DIR) && go run github.com/golangci/golangci-lint/cmd/golangci-lint@latest run ./...
 
 # Clean
 clean:
-	rm -f coverage.out
+	rm -f $(RECEIVER_DIR)/coverage.out

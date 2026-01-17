@@ -8,7 +8,7 @@ import (
 
 var (
 	Type      = component.MustNewType("ilo5")
-	ScopeName = "github.com/murasame29/ilo5-receiver/receiver/ilo5receiver"
+	ScopeName = "github.com/murasame29/opentelemetry-collector-ilo5-reciever"
 )
 
 const (

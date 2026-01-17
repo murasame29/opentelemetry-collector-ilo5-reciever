@@ -12,7 +12,7 @@ processors:
   - gomod: go.opentelemetry.io/collector/processor/batchprocessor v0.143.0
 
 receivers:
-  - gomod: github.com/murasame29/opentelemetry-collector-ilo5-reciever v0.1.0
+  - gomod: github.com/murasame29/opentelemetry-collector-ilo5-reciever/receiver/ilo5receiver v0.1.0
 
 providers:
   - gomod: go.opentelemetry.io/collector/confmap/provider/envprovider v1.29.0

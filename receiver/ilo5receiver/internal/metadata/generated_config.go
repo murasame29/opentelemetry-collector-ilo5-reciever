@@ -9,7 +9,8 @@ import (
 
 // MetricConfig provides common config for a particular metric.
 type MetricConfig struct {
-	Enabled          bool `mapstructure:"enabled"`
+	Enabled bool `mapstructure:"enabled"`
+
 	enabledSetByUser bool
 }
 
@@ -17,12 +18,10 @@ func (ms *MetricConfig) Unmarshal(parser *confmap.Conf) error {
 	if parser == nil {
 		return nil
 	}
-
 	err := parser.Unmarshal(ms)
 	if err != nil {
 		return err
 	}
-
 	ms.enabledSetByUser = parser.IsSet("enabled")
 	return nil
 }
@@ -32,9 +31,9 @@ type MetricsConfig struct {
 	IloFanSpeed             MetricConfig `mapstructure:"ilo.fan.speed"`
 	IloPowerCapacity        MetricConfig `mapstructure:"ilo.power.capacity"`
 	IloPowerConsumption     MetricConfig `mapstructure:"ilo.power.consumption"`
-	IloPowerPsuOutput       MetricConfig `mapstructure:"ilo.power.psu.output"`
-	IloPowerPsuInputVoltage MetricConfig `mapstructure:"ilo.power.psu.input_voltage"`
 	IloPowerPsuHealth       MetricConfig `mapstructure:"ilo.power.psu.health"`
+	IloPowerPsuInputVoltage MetricConfig `mapstructure:"ilo.power.psu.input_voltage"`
+	IloPowerPsuOutput       MetricConfig `mapstructure:"ilo.power.psu.output"`
 	IloPowerVoltage         MetricConfig `mapstructure:"ilo.power.voltage"`
 	IloStorageDriveHealth   MetricConfig `mapstructure:"ilo.storage.drive.health"`
 	IloSystemHealth         MetricConfig `mapstructure:"ilo.system.health"`
@@ -53,13 +52,13 @@ func DefaultMetricsConfig() MetricsConfig {
 		IloPowerConsumption: MetricConfig{
 			Enabled: true,
 		},
-		IloPowerPsuOutput: MetricConfig{
+		IloPowerPsuHealth: MetricConfig{
 			Enabled: true,
 		},
 		IloPowerPsuInputVoltage: MetricConfig{
 			Enabled: true,
 		},
-		IloPowerPsuHealth: MetricConfig{
+		IloPowerPsuOutput: MetricConfig{
 			Enabled: true,
 		},
 		IloPowerVoltage: MetricConfig{
