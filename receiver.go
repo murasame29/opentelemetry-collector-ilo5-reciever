@@ -6,7 +6,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/receiver"
 
-	"github.com/murasame29/ilo5-receiver/receiver/ilo5receiver/internal/ilo"
+	"github.com/murasame29/opentelemetry-collector-ilo5-reciever/internal/ilo"
 )
 
 type iloReceiver struct {

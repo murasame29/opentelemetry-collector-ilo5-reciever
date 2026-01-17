@@ -8,7 +8,7 @@ import (
 	"go.opentelemetry.io/collector/receiver"
 	"go.opentelemetry.io/collector/scraper/scraperhelper"
 
-	"github.com/murasame29/ilo5-receiver/receiver/ilo5receiver/internal/metadata"
+	"github.com/murasame29/opentelemetry-collector-ilo5-reciever/internal/metadata"
 )
 
 // NewFactory creates a factory for the iLO5 receiver.

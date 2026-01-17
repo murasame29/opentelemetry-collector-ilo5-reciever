@@ -1,31 +1,26 @@
-.PHONY: build install-ocb generate run clean
+.PHONY: build test lint generate clean
 
-# OCB version
-OCB_VERSION := 0.143.0
+# Build
+build:
+	go build -v ./...
 
-# Install ocb (OpenTelemetry Collector Builder)
-install-ocb:
-	go install go.opentelemetry.io/collector/cmd/builder@v$(OCB_VERSION)
+# Test
+test:
+	go test -v -race ./...
 
-# Generate collector using ocb
-generate: install-ocb
-	builder --config=builder-config.yaml
+# Test with coverage
+test-coverage:
+	go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
 
-# Build the collector
-build: generate
-	cd dist && go build -o ../ilo5-collector .
+# Lint
+lint:
+	golangci-lint run ./...
 
-# Run with New Relic config
-run:
-	./ilo5-collector --config=config-newrelic.yaml
+# Generate metadata (requires mdatagen)
+generate:
+	go install go.opentelemetry.io/collector/cmd/mdatagen@latest
+	mdatagen metadata.yaml
 
-# Run with debug config (local testing)
-run-debug:
-	./ilo5-collector --config=config.yaml
-
-# Clean build artifacts
+# Clean
 clean:
-	rm -rf dist ilo5-collector
-
-# All-in-one: build and run
-all: build run
+	rm -f coverage.out
