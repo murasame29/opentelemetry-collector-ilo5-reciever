@@ -1,6 +1,10 @@
-.PHONY: build test test-coverage lint clean
+.PHONY: build test test-coverage lint clean generate
 
 RECEIVER_DIR := receiver/ilo5receiver
+
+# Generate metadata
+generate:
+	cd $(RECEIVER_DIR) && mdatagen metadata.yaml
 
 # Build
 build:
